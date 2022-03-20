@@ -3,7 +3,10 @@ session_start();
 define('VIEWS_PATH', './views/');
 define('PARTIALS_PATH', './views/partials/');
 define('DATAS_PATH', './datas/');
-define('POST_FILES', scandir(DATAS_PATH . 'posts'));
+define('POST_FILES', array_filter(scandir(DATAS_PATH . 'posts'), fn($file_name) => str_ends_with($file_name, '.json')));
+define('PER_PAGE', 5);
+define('POST_COUNT', count(POST_FILES) - 2);
+define('MAX_PAGE', intdiv(POST_COUNT, PER_PAGE) + (POST_COUNT % PER_PAGE ? 1 : 0));
 
 $action = $_REQUEST['action'] ?? 'index';
 
@@ -16,19 +19,20 @@ $callback = match ($action) {
 
 function index(): stdClass
 {
-    $posts = get_posts();
+    $p = 1;
+    if (isset($_GET['p'])) {
+        if ((int)$_GET['p'] >= 1 && (int)$_GET['p'] <= MAX_PAGE) {
+            $p = (int)$_GET['p'];
+        }
+    }
+    $posts = get_posts($p);
     $authors = get_authors($posts);
     $categories = get_categories($posts);
     $most_recent_post = get_most_recent_post($posts);
-    $sort_order = 1;
-    if (isset($_GET['order-by'])) {
-        $sort_order = $_GET['order-by'] === 'oldest' ? -1 : 1;
-    }
-    usort($posts, fn($p1, $p2) => $p1->published_at > $p2->published_at ? (-1 * $sort_order) : (1 * $sort_order));
 
     $view_data = new stdClass();
     $view_data->name = 'index.php';
-    $view_data->data = compact('posts', 'authors', 'categories', 'most_recent_post', 'sort_order');
+    $view_data->data = compact('posts', 'authors', 'categories', 'most_recent_post');
     return $view_data;
 }
 
@@ -95,14 +99,25 @@ function store(): void
     exit;
 }
 
-function get_posts(): array
+function get_posts(int $p = 0): array
 {
     foreach (POST_FILES as $file_name) {
-        if (strlen($file_name) > 3) {
-            $posts [substr($file_name, 0, -5)] = json_decode(file_get_contents("./datas/posts/$file_name"));
-        }
+        $posts [] = json_decode(file_get_contents("./datas/posts/$file_name"));
     }
-    return $posts;
+
+    $sort_order = 1;
+    if (isset($_GET['order-by'])) {
+        $sort_order = $_GET['order-by'] === 'oldest' ? -1 : 1;
+    }
+    usort($posts, fn($p1, $p2) => $p1->published_at > $p2->published_at ? (-1 * $sort_order) : (1 * $sort_order));
+
+    if ($p === 0) {
+        return $posts;
+    } else {
+        $start = ($p - 1) * PER_PAGE;
+        $last = $start + PER_PAGE - 1;
+        return array_filter($posts, fn($p, $i) => ($i >= $start && $i <= $last), ARRAY_FILTER_USE_BOTH);
+    }
 }
 
 function get_aside_datas(array $posts): array
