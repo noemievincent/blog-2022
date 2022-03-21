@@ -4,10 +4,15 @@ use JetBrains\PhpStorm\NoReturn;
 
 session_start();
 const DEFAULT_SORT_ORDER = 1;
-const VIEWS_PATH = __DIR__.'/views/';
-const PARTIALS_PATH = __DIR__.'/views/partials/';
+const VIEWS_PATH = __DIR__ . '/views/';
+const PARTIALS_PATH = __DIR__ . '/views/partials/';
 const DATAS_PATH = './datas/';
-define('POST_FILES', array_filter(scandir(DATAS_PATH . 'posts'), fn($file_name) => str_ends_with($file_name, '.json')));
+define('POST_FILES',
+    array_filter(
+        scandir(DATAS_PATH . 'posts'),
+        fn($file_name) => str_ends_with($file_name, '.json')
+    )
+);
 const PER_PAGE = 4;
 const START_PAGE = 1;
 
@@ -32,7 +37,7 @@ function index(): stdClass
     if (isset($_GET['category'])) {
         $filter['type'] = 'category';
         $filter['value'] = $_GET['category'];
-    }elseif(isset($_GET['author'])){
+    } elseif (isset($_GET['author'])) {
         $filter['type'] = 'author_name';
         $filter['value'] = $_GET['author'];
     }
@@ -104,7 +109,7 @@ function show(): stdClass
             $post->excerpt = $_POST['post-excerpt'];
             $post->category = $_POST['post-category'];
             $post->published_at = (new DateTime())->format('Y-m-d H:i:s');
-            $post->author_name = "Myriam Dupont";
+            $post->author_name = "myriam dupont";
             $post->author_avatar = "https://via.placeholder.com/128x128.png/004466?text=people+myriam";
 
             file_put_contents('./datas/posts/' . $post->id . '.json', json_encode($post));
@@ -132,14 +137,6 @@ function get_posts(array $filter = [], string $order = DEFAULT_SORT_ORDER): arra
     usort($posts, fn($p1, $p2) => $p1->published_at > $p2->published_at ? (-1 * $order) : (1 * $order));
 
     return $posts;
-}
-
-function get_aside_datas(array $posts): array
-{
-    $authors = get_authors($posts);
-    $categories = get_categories($posts);
-    $most_recent_posts = get_most_recent_post($posts);
-    return compact('authors', 'categories', 'most_recent_posts');
 }
 
 function get_most_recent_post(): stdClass
