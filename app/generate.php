@@ -2,22 +2,23 @@
 require_once 'vendor/autoload.php';
 $faker = Faker\Factory::create();
 
+// On détruit d’abord les fichiers
 if (file_exists('./datas/posts')) {
     $files = scandir('./datas/posts');
     foreach ($files as $file) {
-        if (strlen($file) > 3) unlink('./datas/posts/' . $file);
+        if (str_ends_with($file, '.json')) unlink('./datas/posts/' . $file);
     }
 }
 $authors = [];
 for ($i = 0; $i < rand(2, 8); $i++) {
     $author_name = $faker->name();
     $author_avatar = $faker->imageUrl(128, 128, 'people', true, $author_name);
-    $authors [] = ['name' => $author_name, 'avatar' => $author_avatar];
+    $authors [] = ['name' => strtolower($author_name), 'avatar' => $author_avatar];
 }
 
 $categories = [];
 for ($i = 0; $i < rand(2, 8); $i++) {
-    $category = substr($faker->sentence(2), 0, -1);
+    $category = strtolower(substr($faker->sentence(2), 0, -1));
     $categories [] = $category;
 }
 

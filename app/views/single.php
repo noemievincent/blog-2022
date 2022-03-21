@@ -28,7 +28,7 @@
         <meta name="theme-color"
               content="#0ed3cf">
 
-        <title>Blog Page by khatabwedaa. </title>
+        <title><?= $view->data['post']->title ?> - Blog</title>
 
         <link href="https://tailwindcomponents.com/css/component.blog-page.css"
               rel="stylesheet">
@@ -45,9 +45,9 @@
                         <div class="mt-6">
                             <div class="max-w-4xl px-10 py-6 mx-auto bg-white rounded-lg shadow-md">
                                 <div class="flex items-center justify-between">
-                                    <a href="#"
+                                    <a href="?author=<?= $view->data['post']->author_name ?>"
                                        class="flex items-center justify-end"><img
-                                                src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=crop&amp;w=731&amp;q=80"
+                                                src="<?= $view->data['post']->author_avatar ?>"
                                                 alt="avatar"
                                                 class="hidden object-cover w-10 h-10 mr-4 rounded-full sm:block">
                                         <h1 class="font-bold text-gray-700 hover:underline"><?= $view->data['post']->author_name ?></h1>

@@ -1,12 +1,15 @@
 <?php
+
+use JetBrains\PhpStorm\NoReturn;
+
 session_start();
-define('VIEWS_PATH', './views/');
-define('PARTIALS_PATH', './views/partials/');
-define('DATAS_PATH', './datas/');
+const DEFAULT_SORT_ORDER = 1;
+const VIEWS_PATH = __DIR__.'/views/';
+const PARTIALS_PATH = __DIR__.'/views/partials/';
+const DATAS_PATH = './datas/';
 define('POST_FILES', array_filter(scandir(DATAS_PATH . 'posts'), fn($file_name) => str_ends_with($file_name, '.json')));
-define('PER_PAGE', 5);
-define('POST_COUNT', count(POST_FILES) - 2);
-define('MAX_PAGE', intdiv(POST_COUNT, PER_PAGE) + (POST_COUNT % PER_PAGE ? 1 : 0));
+const PER_PAGE = 4;
+const START_PAGE = 1;
 
 $action = $_REQUEST['action'] ?? 'index';
 
@@ -19,20 +22,41 @@ $callback = match ($action) {
 
 function index(): stdClass
 {
-    $p = 1;
+
+    $sort_order = DEFAULT_SORT_ORDER;
+    if (isset($_GET['order-by'])) {
+        $sort_order = $_GET['order-by'] === 'oldest' ? -1 : 1;
+    }
+
+    $filter = [];
+    if (isset($_GET['category'])) {
+        $filter['type'] = 'category';
+        $filter['value'] = $_GET['category'];
+    }elseif(isset($_GET['author'])){
+        $filter['type'] = 'author_name';
+        $filter['value'] = $_GET['author'];
+    }
+
+    $posts = get_posts($filter, $sort_order);
+    $posts_count = count($posts);
+    define('MAX_PAGE', intdiv($posts_count, PER_PAGE) + ($posts_count % PER_PAGE ? 1 : 0));
+
+    $p = START_PAGE;
     if (isset($_GET['p'])) {
-        if ((int)$_GET['p'] >= 1 && (int)$_GET['p'] <= MAX_PAGE) {
+        if ((int)$_GET['p'] >= START_PAGE && (int)$_GET['p'] <= MAX_PAGE) {
             $p = (int)$_GET['p'];
         }
     }
-    $posts = get_posts($p);
-    $authors = get_authors($posts);
-    $categories = get_categories($posts);
-    $most_recent_post = get_most_recent_post($posts);
+
+
+    $posts = get_paginated_posts($posts, $p);
+    $authors = get_authors();
+    $categories = get_categories();
+    $most_recent_post = get_most_recent_post();
 
     $view_data = new stdClass();
     $view_data->name = 'index.php';
-    $view_data->data = compact('posts', 'authors', 'categories', 'most_recent_post');
+    $view_data->data = compact('posts', 'authors', 'categories', 'most_recent_post', 'p');
     return $view_data;
 }
 
@@ -51,11 +75,11 @@ function create(): stdClass
 function show(): stdClass
 {
     if (!isset($_GET['id'])) {
-        header('Location: index.php'); // Idéalement 404
+        header('404: index.php'); // Idéalement 404
         exit;
     }
     if (!in_array($_GET['id'] . '.json', POST_FILES)) {
-        header('Location: index.php'); // Idéalement 404
+        header('Location: 404.php'); // Idéalement 404
         exit;
     }
     $post = json_decode(file_get_contents(DATAS_PATH . 'posts/' . $_GET['id'] . '.json'));
@@ -69,11 +93,10 @@ function show(): stdClass
     return $view_data;
 }
 
-function store(): void
+#[NoReturn] function store(): void
 {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!has_validation_errors()) {
-
             $post = new stdClass();
             $post->id = uniqid();
             $post->title = $_POST['post-title'];
@@ -82,42 +105,33 @@ function store(): void
             $post->category = $_POST['post-category'];
             $post->published_at = (new DateTime())->format('Y-m-d H:i:s');
             $post->author_name = "Myriam Dupont";
-            $post->author_avatar = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3174&q=80";
+            $post->author_avatar = "https://via.placeholder.com/128x128.png/004466?text=people+myriam";
 
             file_put_contents('./datas/posts/' . $post->id . '.json', json_encode($post));
 
             header('Location: index.php?action=show&id=' . $post->id);
-            exit;
         } else {
             $_SESSION['old'] = $_POST;
             header('Location: index.php?action=create');
-            exit;
         }
+        exit;
     }
 
     header('Location: index.php');// Idéalement 404
     exit;
 }
 
-function get_posts(int $p = 0): array
+function get_posts(array $filter = [], string $order = DEFAULT_SORT_ORDER): array
 {
-    foreach (POST_FILES as $file_name) {
-        $posts [] = json_decode(file_get_contents("./datas/posts/$file_name"));
+    $posts = get_all_posts();
+
+    if ($filter !== []) {
+        $posts = array_filter($posts, fn($p) => $p->{$filter['type']} === $filter['value']);
     }
 
-    $sort_order = 1;
-    if (isset($_GET['order-by'])) {
-        $sort_order = $_GET['order-by'] === 'oldest' ? -1 : 1;
-    }
-    usort($posts, fn($p1, $p2) => $p1->published_at > $p2->published_at ? (-1 * $sort_order) : (1 * $sort_order));
+    usort($posts, fn($p1, $p2) => $p1->published_at > $p2->published_at ? (-1 * $order) : (1 * $order));
 
-    if ($p === 0) {
-        return $posts;
-    } else {
-        $start = ($p - 1) * PER_PAGE;
-        $last = $start + PER_PAGE - 1;
-        return array_filter($posts, fn($p, $i) => ($i >= $start && $i <= $last), ARRAY_FILTER_USE_BOTH);
-    }
+    return $posts;
 }
 
 function get_aside_datas(array $posts): array
@@ -128,8 +142,10 @@ function get_aside_datas(array $posts): array
     return compact('authors', 'categories', 'most_recent_posts');
 }
 
-function get_most_recent_post(array $posts): stdClass
+function get_most_recent_post(): stdClass
 {
+    $posts = get_all_posts();
+
     $most_recent_post = null;
     foreach ($posts as $post) {
         if (is_null($most_recent_post) || $post->published_at > $most_recent_post?->published_at) {
@@ -139,9 +155,22 @@ function get_most_recent_post(array $posts): stdClass
     return $most_recent_post;
 }
 
-function get_categories(array $posts): array
+function get_all_posts(): array
+{
+    $posts = [];
+
+    foreach (POST_FILES as $file_name) {
+        $posts [] = json_decode(file_get_contents("./datas/posts/$file_name"));
+    }
+
+    return $posts;
+}
+
+function get_categories(): array
 {
     $categories = [];
+    $posts = get_all_posts();
+
     foreach ($posts as $post) {
         if (!in_array($post->category, array_keys($categories))) {
             $categories [$post->category] = 1;
@@ -152,9 +181,11 @@ function get_categories(array $posts): array
     return $categories;
 }
 
-function get_authors(array $posts): array
+function get_authors(): array
 {
     $authors = [];
+    $posts = get_all_posts();
+
     foreach ($posts as $post) {
         if (!in_array($post->author_name, array_keys($authors))) {
             $author = new stdClass();
@@ -190,6 +221,14 @@ function has_validation_errors(): bool
     return (bool)count($_SESSION['errors']);
 }
 
+function get_paginated_posts(array $posts, int $p): array
+{
+    $start = ($p - 1) * PER_PAGE;
+    $last = $start + PER_PAGE - 1;
+
+    return array_filter($posts, fn($p, $i) => ($i >= $start && $i <= $last), ARRAY_FILTER_USE_BOTH);
+
+}
 
 /**/
 

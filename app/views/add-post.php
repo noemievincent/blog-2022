@@ -41,7 +41,7 @@
                 <div class="container flex justify-between mx-auto">
                     <div class="w-full lg:w-8/12">
                         <div class="flex items-center justify-between">
-                            <h1 class="text-xl font-bold text-gray-700 md:text-2xl">Add Post</h1>
+                            <h1 class="text-xl font-bold text-gray-700 md:text-2xl">Create Post</h1>
                         </div>
                         <div class="mt-6">
                             <form action="/"
@@ -81,9 +81,9 @@
                                 <?= isset($_SESSION['errors']['category']) ? '<p class="italic text-red-600">' . $_SESSION['errors']['category'] . '</p>' : '' ?>
                                 <select name="post-category"
                                         id="post-category"
-                                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                        class="w-full border-<?= isset($_SESSION['errors']['category']) ? 'red-600' : 'gray-300' ?> rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     <?php foreach (array_keys($view->data['categories']) as $category): ?>
-                                        <option value="<?= strtolower($category) ?>" <?= strtolower($_SESSION['old']['post-category']) === strtolower($category) ? 'selected' : '' ?>><?= ucwords($category) ?></option>
+                                        <option value="<?= strtolower($category) ?>" <?= isset($_SESSION['old']['post-category']) ? (strtolower($_SESSION['old']['post-category']) === strtolower($category) ? 'selected' : '') : '' ?>><?= ucwords($category) ?></option>
                                     <?php endforeach ?>
                                 </select>
                                 <input type="hidden"
@@ -91,7 +91,7 @@
                                        value="store">
                                 <button type="submit"
                                         class="float-right mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md">
-                                    Publish new post
+                                    Create new post
                                 </button>
                             </form>
                         </div>
