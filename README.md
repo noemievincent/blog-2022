@@ -49,7 +49,7 @@ La liste est *toujours* paginée. Seuls quelques posts sont effectivement affich
 
 Si paginer est déjà une manière de filtrer, un autre filtre, peut s’ajouter à la pagination. Soit la liste est filtrée par auteur, `author`, soit par catégorie `category`.  
 
-Les posts sont aussi triés. Soit les nouveaux d’abord, soit les anciens d’abord. `?order-by=oldest` ou `order-by=newest`
+Les posts sont aussi triés. Soit les nouveaux d’abord, soit les anciens d’abord. `?order-by=oldest` ou `order-by=newest`. Dans cet exercice, je ne demande pas de tenir compte des filtres appliqués avant de changer d’ordre. Le changement d’ordre de tri redémarre donc la liste à la première page et supprime les filtres éventuels par auteur ou par catégorie. 
 
 Quand on change de page alors qu’on est en train de voir les posts d’un auteur ou d’une catégorie, il faut naturellement continuer de filtrer selon cet auteur ou cette catégorie. Il faut donc construire les liens en tenant compte de la QS existante.
 

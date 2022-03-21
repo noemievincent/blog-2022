@@ -52,7 +52,7 @@
                                                 class="hidden object-cover w-10 h-10 mr-4 rounded-full sm:block">
                                         <h1 class="font-bold text-gray-700 hover:underline"><?= $view->data['post']->author_name ?></h1>
                                     </a>
-                                    <a href="#"
+                                    <a href="/?category=<?= strtolower($view->data['post']->category) ?>"
                                        class="px-2 py-1 font-bold text-gray-100 bg-gray-600 rounded hover:bg-gray-500"><?= ucwords($view->data['post']->category) ?></a>
                                 </div>
                                 <div class="my-4">
