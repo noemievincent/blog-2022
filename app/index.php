@@ -3,18 +3,20 @@
 use JetBrains\PhpStorm\NoReturn;
 
 session_start();
+
 const DEFAULT_SORT_ORDER = 1;
 const VIEWS_PATH = __DIR__ . '/views/';
 const PARTIALS_PATH = __DIR__ . '/views/partials/';
 const DATAS_PATH = './datas/';
+const PER_PAGE = 4;
+const START_PAGE = 1;
+
 define('POST_FILES',
     array_filter(
         scandir(DATAS_PATH . 'posts'),
         fn($file_name) => str_ends_with($file_name, '.json')
     )
 );
-const PER_PAGE = 4;
-const START_PAGE = 1;
 
 $action = $_REQUEST['action'] ?? 'index';
 
