@@ -2,21 +2,26 @@
 
 use JetBrains\PhpStorm\NoReturn;
 
+require './vendor/autoload.php';
+
 session_start();
 
 const DEFAULT_SORT_ORDER = 1;
 const VIEWS_PATH = __DIR__ . '/views/';
 const PARTIALS_PATH = __DIR__ . '/views/partials/';
-const DATAS_PATH = './datas/';
+const DSN = 'mysql:host=database;dbname=blog;port=3306';
+const MYSQL_USER = 'mysql';
+const MYSQL_PWD = 'mysql';
 const PER_PAGE = 4;
 const START_PAGE = 1;
+const PDO_OPTIONS = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ];
 
-define('POST_FILES',
-    array_filter(
-        scandir(DATAS_PATH . 'posts'),
-        fn($file_name) => str_ends_with($file_name, '.json')
-    )
-);
+try {
+    define('PDO_CONNECTION', new PDO(DSN, MYSQL_USER, MYSQL_PWD, PDO_OPTIONS));
+} catch (PDOException $e) {
+    echo($e->getMessage());
+    exit;
+}
 
 $action = $_REQUEST['action'] ?? 'index';
 
@@ -82,21 +87,49 @@ function create(): stdClass
 function show(): stdClass
 {
     if (!isset($_GET['id'])) {
-        header('404: index.php'); // Idéalement 404
+        header('location: 404.php'); // Idéalement 404
         exit;
     }
-    if (!in_array($_GET['id'] . '.json', POST_FILES)) {
+    $pdost = PDO_CONNECTION->prepare(<<<SQL
+    SELECT posts.id as post_id, 
+           posts.title as post_title, 
+           posts.body as post_body, 
+           posts.published_at as post_published_at, 
+           a.id as post_author_id, 
+           a.name as post_author_name,
+           a.avatar as post_author_avatar
+    FROM posts 
+    JOIN authors a on posts.author_id = a.id
+    WHERE posts.id = :id;
+    SQL
+    );
+    $pdost->execute(['id' => $_GET['id']]);
+    $post = $pdost->fetch();
+    if (!$post) {
         header('Location: 404.php'); // Idéalement 404
         exit;
     }
-    $post = json_decode(file_get_contents(DATAS_PATH . 'posts/' . $_GET['id'] . '.json'));
+    $pdost = PDO_CONNECTION->prepare(<<<SQL
+    SELECT c.name as post_category_name,
+           c.id as post_category_id
+    FROM category_post cp 
+    JOIN categories c on cp.category_id = c.id
+    WHERE cp.post_id = :id;
+    SQL
+    );
+    $pdost->execute(['id' => $_GET['id']]);
+    $categories = $pdost->fetchAll();
+    $post->categories = $categories;
+    /*
     $posts = get_posts();
     $authors = get_authors($posts);
     $categories = get_categories($posts);
     $most_recent_post = get_most_recent_post($posts);
+    */
     $view_data = new stdClass();
     $view_data->name = 'single.php';
-    $view_data->data = compact('post', 'authors', 'categories', 'most_recent_post');
+    //$view_data->data = compact('post', 'authors', 'categories', 'most_recent_post');
+    $view_data->data = compact('post');
     return $view_data;
 }
 
@@ -143,7 +176,6 @@ function get_posts(array $filter = [], string $order = DEFAULT_SORT_ORDER): arra
 
 function get_most_recent_post(): stdClass
 {
-    $posts = get_all_posts();
 
     $most_recent_post = null;
     foreach ($posts as $post) {
