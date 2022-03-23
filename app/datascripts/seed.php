@@ -125,4 +125,4 @@ for ($i = 0; $i < POSTS_COUNT; $i++) {
         );
     }
 }
-echo '<a href="index.php">Back to website!</a>';
+echo '<a href="../index.php">Back to website!</a>';
