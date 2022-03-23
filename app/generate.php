@@ -1,9 +1,9 @@
 <?php
 require_once 'vendor/autoload.php';
 $faker = Faker\Factory::create();
-define ('AUTHORS_COUNT', rand (2,8));
-define ('CATEGORIES_COUNT', rand (2,8));
-define ('POSTS_COUNT', rand (30,50));
+define('AUTHORS_COUNT', rand(2, 8));
+define('CATEGORIES_COUNT', rand(2, 8));
+define('POSTS_COUNT', rand(30, 50));
 
 
 // On détruit d’abord les fichiers existants
@@ -31,7 +31,7 @@ for ($i = 0; $i < CATEGORIES_COUNT; $i++) {
 }
 
 // On crée un tableau de posts et on stocke chacun dans un fichier nommé selon son id.
-for ($i = 0; $i < 30; $i++) {
+for ($i = 0; $i < POSTS_COUNT; $i++) {
     $post = new stdClass();
     $post->id = uniqid();
     $post->published_at = $faker->dateTimeBetween('-3 years', 'now')->format('Y-m-d H:i:s');
