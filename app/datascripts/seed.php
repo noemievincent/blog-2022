@@ -4,7 +4,7 @@ use Carbon\Carbon;
 use Cocur\Slugify\Slugify;
 use Ramsey\Uuid\Uuid;
 
-require_once 'vendor/autoload.php';
+require_once '../vendor/autoload.php';
 $faker = Faker\Factory::create();
 define('AUTHORS_COUNT', rand(2, 8));
 define('CATEGORIES_COUNT', rand(2, 8));
@@ -85,13 +85,13 @@ for ($i = 0; $i < POSTS_COUNT; $i++) {
     $post_created_at = $creation_date;
     $post_published_at = $creation_date->addDays(rand(0, 1) * rand(2, 20));
     $post_updated_at = rand(0, 10) ? $post_created_at : $post_created_at->addWeeks(rand(2, 8));
-    $post_deleted_at = rand(0, 10) ? NULL : Carbon::now();
+    $post_deleted_at = rand(0, 10) ? null : Carbon::now();
     $post_author_id = $pdo->query('SELECT id FROM authors ORDER BY rand() LIMIT 1', PDO::FETCH_COLUMN, 0)->fetch();
     $post_title = $faker->sentence(10);
     $post_slug = $slugify->slugify($post_title);
     $post_excerpt = $faker->sentence(40);
     $post_thumbnail = $faker->imageUrl(640, 480, 'landscape', true);
-    $post_body = '<p>' . implode('</p><p>', $faker->paragraphs(12)) . '</p>';
+    $post_body = '<p>'.implode('</p><p>', $faker->paragraphs(12)).'</p>';
 
     $pdo->exec(<<<SQL
         INSERT INTO posts(id, title, slug, excerpt, author_id, body, created_at, updated_at, published_at, thumbnail) 
@@ -116,8 +116,12 @@ $categories_ids = $pdo->query('SELECT id FROM categories')->fetchAll(PDO::FETCH_
 
 for ($i = 0; $i < POSTS_COUNT; $i++) {
     $post_id = $pdo->query("SELECT id FROM posts LIMIT $i,1", PDO::FETCH_COLUMN, 0)->fetch();
-    for ($j = 0; $j < CATEGORIES_COUNT; $j += rand(intdiv(CATEGORIES_COUNT, 2), CATEGORIES_COUNT)) {
+    echo '<br><br><br><br><br>'.$i.': ';
+    echo $post_id.'<br>';
+    echo '-------------'.'<br>';
+    for ($j = rand(0, intdiv(CATEGORIES_COUNT, 2)); $j < CATEGORIES_COUNT; $j += rand(1, CATEGORIES_COUNT)) {
         $category_id = $categories_ids[$j]['id'];
+        echo $j.':'.$category_id.'<br>';
         $pdo->exec(<<<SQL
             INSERT INTO category_post(category_id, post_id) 
             VALUES('$category_id', '$post_id');

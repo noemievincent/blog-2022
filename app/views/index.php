@@ -49,32 +49,34 @@
                                 <div class="max-w-4xl px-10 py-6 mx-auto bg-white rounded-lg shadow-md">
                                     <div class="flex items-center justify-between">
                                         <span class="font-light text-gray-600">
-                                            <?= (new DateTime($post->published_at))->format('M j, Y - G:i') ?>
+                                            <?= (new DateTime($post->post_published_at))->format('M j, Y - G:i') ?>
                                         </span>
-                                        <a href="?category=<?= $post->category ?>"
+                                        <?php foreach($post->post_categories as $category): ?>
+                                        <a href="?category=<?= $category->category_slug ?>"
                                            class="px-2 py-1 font-bold text-gray-100 bg-gray-600 rounded hover:bg-gray-500">
-                                            <?= ucwords($post->category) ?>
+                                            <?= ucwords($category->category_name) ?>
                                         </a>
+                                        <?php endforeach ?>
                                     </div>
                                     <div class="mt-2">
-                                        <a href="index.php?action=show&id=<?= $post->id ?>"
+                                        <a href="index.php?action=show&slug=<?= $post->post_slug ?>"
                                            class="text-2xl font-bold text-gray-700 hover:underline">
-                                            <?= $post->title ?>
+                                            <?= $post->post_title ?>
                                         </a>
-                                        <p class="mt-2 text-gray-600"><?= $post->excerpt ?></p>
+                                        <p class="mt-2 text-gray-600"><?= $post->post_excerpt ?></p>
                                     </div>
                                     <div class="flex items-center justify-between mt-4">
-                                        <a href="index.php?action=show&id=<?= $post->id ?>"
+                                        <a href="index.php?action=show&slug=<?= $post->post_slug ?>"
                                            class="text-blue-500 hover:underline">
-                                            Read more<span class="sr-only"> about <?= $post->title ?></span>
+                                            Read more<span class="sr-only"> about <?= $post->post_title ?></span>
                                         </a>
                                         <div>
-                                            <a href="?author=<?= $post->author_name ?>"
+                                            <a href="?author=<?= $post->post_author_slug ?>"
                                                class="flex items-center">
-                                                <img src="<?= $post->author_avatar ?>"
-                                                     alt="<?= $post->author_name ?>"
+                                                <img src="<?= $post->post_author_avatar ?>"
+                                                     alt="<?= $post->post_author_name ?>"
                                                      class="hidden object-cover w-10 h-10 mx-4 rounded-full sm:block">
-                                                <span class="font-bold text-gray-700 hover:underline"><?= $post->author_name ?></span>
+                                                <span class="font-bold text-gray-700 hover:underline"><?= $post->post_author_name ?></span>
                                             </a></div>
                                     </div>
                                 </div>

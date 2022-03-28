@@ -2,13 +2,13 @@
 
 use JetBrains\PhpStorm\NoReturn;
 
-require './vendor/autoload.php';
-
 session_start();
 
-const DEFAULT_SORT_ORDER = 1;
-const VIEWS_PATH = __DIR__ . '/views/';
-const PARTIALS_PATH = __DIR__ . '/views/partials/';
+define('DOCUMENT_ROOT', $_SERVER['DOCUMENT_ROOT']);
+require DOCUMENT_ROOT.'/vendor/autoload.php';
+const DEFAULT_SORT_ORDER = 'DESC';
+const VIEWS_PATH = DOCUMENT_ROOT.'/views/';
+const PARTIALS_PATH = DOCUMENT_ROOT.'/views/partials/';
 const DSN = 'mysql:host=database;dbname=blog;port=3306';
 const MYSQL_USER = 'mysql';
 const MYSQL_PWD = 'mysql';
@@ -23,8 +23,11 @@ try {
     exit;
 }
 
-$action = $_REQUEST['action'] ?? 'index';
+define('POSTS_COUNT', get_posts_count());
+define('MAX_PAGE', intdiv(POSTS_COUNT, PER_PAGE) + (POSTS_COUNT % PER_PAGE ? 1 : 0));
 
+
+$action = $_REQUEST['action'] ?? 'index';
 $callback = match ($action) {
     'create' => 'create',
     'show' => 'show',
@@ -34,11 +37,7 @@ $callback = match ($action) {
 
 function index(): stdClass
 {
-
-    $sort_order = DEFAULT_SORT_ORDER;
-    if (isset($_GET['order-by'])) {
-        $sort_order = $_GET['order-by'] === 'oldest' ? -1 : 1;
-    }
+    $sort_order = isset($_GET['order-by']) && $_GET['order-by'] === 'oldest' ? 'ASC' : DEFAULT_SORT_ORDER;
 
     $filter = [];
     if (isset($_GET['category'])) {
@@ -49,19 +48,16 @@ function index(): stdClass
         $filter['value'] = $_GET['author'];
     }
 
-    $posts = get_posts($filter, $sort_order);
-    $posts_count = count($posts);
-    define('MAX_PAGE', intdiv($posts_count, PER_PAGE) + ($posts_count % PER_PAGE ? 1 : 0));
 
     $p = START_PAGE;
     if (isset($_GET['p'])) {
-        if ((int)$_GET['p'] >= START_PAGE && (int)$_GET['p'] <= MAX_PAGE) {
-            $p = (int)$_GET['p'];
+        if ((int) $_GET['p'] >= START_PAGE && (int) $_GET['p'] <= MAX_PAGE) {
+            $p = (int) $_GET['p'];
         }
     }
 
+    $posts = get_posts($filter, $sort_order, $p);
 
-    $posts = get_paginated_posts($posts, $p);
     $authors = get_authors();
     $categories = get_categories();
     $most_recent_post = get_most_recent_post();
@@ -147,9 +143,9 @@ function show(): stdClass
             $post->author_name = "myriam dupont";
             $post->author_avatar = "https://via.placeholder.com/128x128.png/004466?text=people+myriam";
 
-            file_put_contents('./datas/posts/' . $post->id . '.json', json_encode($post));
+            file_put_contents('./datas/posts/'.$post->id.'.json', json_encode($post));
 
-            header('Location: index.php?action=show&id=' . $post->id);
+            header('Location: index.php?action=show&id='.$post->id);
         } else {
             $_SESSION['old'] = $_POST;
             header('Location: index.php?action=create');
@@ -161,74 +157,203 @@ function show(): stdClass
     exit;
 }
 
-function get_posts(array $filter = [], string $order = DEFAULT_SORT_ORDER): array
+
+function get_posts(array $filter = [], string $order = DEFAULT_SORT_ORDER, int $page = 1): array
 {
-    $posts = get_all_posts();
+    $posts = [];
+    $start = ($page - 1) * PER_PAGE;
+    $per_page = PER_PAGE;
 
-    if ($filter !== []) {
-        $posts = array_filter($posts, fn($p) => $p->{$filter['type']} === $filter['value']);
+    if (isset($filter['type'])) {
+        $value = $filter['value'];
+        if ($filter['type'] === 'category') {
+            $category = get_category_by_slug($value);
+            if ($category) {
+                $posts = get_posts_by_category($category->id, $order, $start, $per_page);
+            }
+        } elseif ($filter['type'] === 'author') {
+            $author = get_author_by_slug($value);
+            if ($author) {
+                $posts = get_posts_by_author($author->id, $order, $start, $per_page);
+            }
+        }
+    } else {
+        $posts = get_posts_unfiltered($order, $start, $per_page);
     }
-
-    usort($posts, fn($p1, $p2) => $p1->published_at > $p2->published_at ? (-1 * $order) : (1 * $order));
-
+    add_categories_to_posts($posts);
     return $posts;
+}
+
+function add_categories_to_posts(array &$posts)
+{
+    foreach ($posts as $post) {
+        $post->post_categories = get_post_categories($post->post_id);
+    }
+}
+
+function add_categories_to_post(stdClass &$post)
+{
+    $post->post_categories = get_post_categories($post->post_id);
+}
+
+function get_posts_count(): string
+{
+    $sql = <<<SQL
+                SELECT count(*) 
+                FROM posts p;
+            SQL;
+
+    return PDO_CONNECTION->query($sql)->fetchColumn();
+}
+
+function get_post_categories($id): array
+{
+    $sql = <<<SQL
+            SELECT c.slug as category_slug, c.name as category_name
+            FROM categories c 
+            JOIN category_post cp on c.id = cp.category_id
+            WHERE cp.post_id = :id;
+        SQL;
+    $statement = PDO_CONNECTION->prepare($sql);
+    $statement->execute([':id' => $id]);
+
+    return $statement->fetchAll();
+}
+
+function get_posts_unfiltered(string $order, int $start, int $per_page): array
+{
+    $sql = <<<SQL
+            SELECT p.id as post_id, 
+                   p.slug as post_slug, 
+                   p.title as post_title, 
+                   p.excerpt as post_excerpt,
+                   p.published_at as post_published_at,
+                   a.avatar as post_author_avatar,
+                   a.name as post_author_name,
+                   a.slug as post_author_slug
+            FROM posts p 
+            JOIN authors a on p.author_id = a.id
+            ORDER BY published_at $order
+            LIMIT $start, $per_page;
+        SQL;
+
+    return PDO_CONNECTION->query($sql)->fetchAll();
+}
+
+function get_posts_by_category(int $id, string $order, int $start, int $per_page): array
+{
+    $sql = <<<SQL
+                SELECT p.id as post_id, 
+                       p.title as post_title, 
+                       p.published_at as post_published_at,
+                       a.avatar as post_author_avatar,
+                       a.name as post_author_name,
+                       a.slug as post_author_slug
+                FROM posts p
+                JOIN authors a on p.author_id = a.id
+                JOIN category_post cp on p.id = cp.post_id
+                WHERE cp.post_id = :id
+                ORDER BY published_at $order
+                LIMIT $start, $per_page;
+            SQL;
+
+    $statement = PDO_CONNECTION->prepare($sql);
+    $statement->execute([':id' => $id]);
+
+    return $statement->fetchAll();
+}
+
+function get_posts_by_author(int $id, string $order, int $start, int $per_page): array
+{
+    $sql = <<<SQL
+                SELECT p.id as post_id, 
+                       p.title as post_title, 
+                       p.published_at as post_published_at,
+                       a.avatar as post_author_avatar,
+                       a.name as post_author_name,
+                       a.slug as post_author_slug
+                FROM posts p
+                JOIN authors a on p.author_id = a.id
+                WHERE author_id = :id
+                ORDER BY published_at $order
+                LIMIT $start, $per_page;
+            SQL;
+
+    $statement = PDO_CONNECTION->prepare($sql);
+    $statement->execute([':id' => $id]);
+
+    return $statement->fetchAll();
 }
 
 function get_most_recent_post(): stdClass
 {
+    $sql = <<<SQL
+                SELECT p.id as post_id, 
+                   p.slug as post_slug, 
+                   p.title as post_title, 
+                   p.excerpt as post_excerpt,
+                   p.published_at as post_published_at,
+                   a.avatar as post_author_avatar,
+                   a.name as post_author_name,
+                   a.slug as post_author_slug
+                FROM posts p 
+                JOIN authors a on p.author_id = a.id
+                ORDER BY published_at DESC
+                LIMIT 1;
+            SQL;
 
-    $most_recent_post = null;
-    foreach ($posts as $post) {
-        if (is_null($most_recent_post) || $post->published_at > $most_recent_post?->published_at) {
-            $most_recent_post = $post;
-        }
-    }
-    return $most_recent_post;
-}
+    $post = PDO_CONNECTION->query($sql)->fetch();
+    add_categories_to_post($post);
 
-function get_all_posts(): array
-{
-    $posts = [];
-
-    foreach (POST_FILES as $file_name) {
-        $posts [] = json_decode(file_get_contents("./datas/posts/$file_name"));
-    }
-
-    return $posts;
+    return $post;
 }
 
 function get_categories(): array
 {
-    $categories = [];
-    $posts = get_all_posts();
+    $sql = <<<SQL
+                SELECT c.name, c.slug, count(p.id) as posts_count
+                FROM categories c
+                JOIN category_post cp on c.id = cp.category_id
+                JOIN posts p on cp.post_id = p.id
+                GROUP BY c.name, c.slug
+                ORDER BY c.name;
+            SQL;
 
-    foreach ($posts as $post) {
-        if (!in_array($post->category, array_keys($categories))) {
-            $categories [$post->category] = 1;
-        } else {
-            $categories [$post->category] += 1;
-        }
-    }
-    return $categories;
+    return PDO_CONNECTION->query($sql)->fetchAll();
+}
+
+function get_category_by_slug($slug): stdClass|bool
+{
+    $sql = <<<SQL
+            SELECT * FROM categories WHERE slug = :slug;
+        SQL;
+    $statement = PDO_CONNECTION->prepare($sql);
+    $statement->execute([':slug' => $slug]);
+
+    return $statement->fetch();
 }
 
 function get_authors(): array
 {
-    $authors = [];
-    $posts = get_all_posts();
+    $sql = <<<SQL
+                SELECT a.name, a.avatar, a.slug, count(posts.id) as posts_count
+                FROM posts
+                JOIN authors a on posts.author_id = a.id
+                GROUP BY a.id
+            SQL;
 
-    foreach ($posts as $post) {
-        if (!in_array($post->author_name, array_keys($authors))) {
-            $author = new stdClass();
-            $author->name = $post->author_name;
-            $author->avatar = $post->author_avatar;
-            $author->posts_count = 1;
-            $authors [$post->author_name] = $author;
-        } else {
-            $authors [$post->author_name]->posts_count += 1;
-        }
-    }
-    return $authors;
+    return PDO_CONNECTION->query($sql)->fetchAll();
+}
+
+function get_author_by_slug($slug): stdClass|bool
+{
+    $sql = <<<SQL
+            SELECT * FROM authors WHERE slug = :slug;
+        SQL;
+    $statement = PDO_CONNECTION->prepare($sql);
+    $statement->execute([':slug' => $slug]);
+
+    return $statement->fetch();
 }
 
 function has_validation_errors(): bool
@@ -249,22 +374,13 @@ function has_validation_errors(): bool
     if (!in_array($_POST['post-category'], array_keys($categories))) {
         $_SESSION['errors']['category'] = 'La catégorie doit faire partie des catégories existantes';
     }
-    return (bool)count($_SESSION['errors']);
-}
-
-function get_paginated_posts(array $posts, int $p): array
-{
-    $start = ($p - 1) * PER_PAGE;
-    $last = $start + PER_PAGE - 1;
-
-    return array_filter($posts, fn($p, $i) => ($i >= $start && $i <= $last), ARRAY_FILTER_USE_BOTH);
-
+    return (bool) count($_SESSION['errors']);
 }
 
 /**/
 
 
 $view = call_user_func($callback);
-include VIEWS_PATH . $view->name;
+include VIEWS_PATH.$view->name;
 
 
