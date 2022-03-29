@@ -1,6 +1,7 @@
 <?php
 try {
-    $pdo = new PDO('mysql:host=database;port=3306;dbname=blog', 'mysql', 'mysql', [PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+    $pdo = new PDO('mysql:host=database;port=3306;dbname=blog', 'mysql', 'mysql',
+        [PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 } catch (PDOException $e) {
     var_dump($e);
     exit;
@@ -15,7 +16,7 @@ $pdo->exec(<<< SQL
     (
         id         varchar(255) not null primary key,
         name       varchar(255) null,
-        slug       varchar(255) null,
+        slug       varchar(255) null unique,
         avatar     tinytext null,
         created_at timestamp    null,
         deleted_at timestamp    null,
@@ -24,8 +25,8 @@ $pdo->exec(<<< SQL
     create table categories
     (
         id         varchar(255) not null primary key,
-        name       varchar(255) null,
-        slug       varchar(255) null,
+        name       varchar(255) null unique,
+        slug       varchar(255) null unique,
         created_at timestamp    null,
         deleted_at timestamp    null,
         updated_at timestamp    null
@@ -34,7 +35,7 @@ $pdo->exec(<<< SQL
     (
         id           varchar(255) not null primary key,
         title        varchar(255) null,
-        slug         varchar(255) null,
+        slug         varchar(255) null unique,
         body         text         null,
         published_at timestamp    null,
         excerpt      text         null,

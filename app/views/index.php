@@ -35,13 +35,13 @@
     </head>
     <body class="bg-gray-200">
         <div class="overflow-x-hidden bg-gray-100">
-            <?php include PARTIALS_PATH . '_main-nav-not-connected.php' ?>
+            <?php include PARTIALS_PATH.'_main-nav-not-connected.php' ?>
             <div class="px-6 py-8">
                 <div class="container flex justify-between mx-auto">
                     <div class="w-full lg:w-8/12">
                         <div class="flex items-center justify-between">
                             <h1 class="text-xl font-bold text-gray-700 md:text-2xl">Posts</h1>
-                            <?php include PARTIALS_PATH . '_order-posts.php' ?>
+                            <?php include PARTIALS_PATH.'_order-posts.php' ?>
                         </div>
 
                         <?php foreach ($view->data['posts'] as $post): ?>
@@ -51,11 +51,11 @@
                                         <span class="font-light text-gray-600">
                                             <?= (new DateTime($post->post_published_at))->format('M j, Y - G:i') ?>
                                         </span>
-                                        <?php foreach($post->post_categories as $category): ?>
-                                        <a href="?category=<?= $category->category_slug ?>"
-                                           class="px-2 py-1 font-bold text-gray-100 bg-gray-600 rounded hover:bg-gray-500">
-                                            <?= ucwords($category->category_name) ?>
-                                        </a>
+                                        <?php foreach ($post->post_categories as $category): ?>
+                                            <a href="?category=<?= $category->category_slug ?>"
+                                               class="px-2 py-1 font-bold text-gray-100 bg-gray-600 rounded hover:bg-gray-500">
+                                                <?= ucwords($category->category_name) ?>
+                                            </a>
                                         <?php endforeach ?>
                                     </div>
                                     <div class="mt-2">
@@ -76,15 +76,15 @@
                                                 <img src="<?= $post->post_author_avatar ?>"
                                                      alt="<?= $post->post_author_name ?>"
                                                      class="hidden object-cover w-10 h-10 mx-4 rounded-full sm:block">
-                                                <span class="font-bold text-gray-700 hover:underline"><?= $post->post_author_name ?></span>
+                                                <span class="font-bold text-gray-700 hover:underline"><?= ucwords($post->post_author_name) ?></span>
                                             </a></div>
                                     </div>
                                 </div>
                             </div>
                         <?php endforeach ?>
-                        <?php include PARTIALS_PATH . '_pagination.php' ?>
+                        <?php include PARTIALS_PATH.'_pagination.php' ?>
                     </div>
-                    <?php include PARTIALS_PATH . '_aside.php' ?>
+                    <?php include PARTIALS_PATH.'_aside.php' ?>
                 </div>
             </div>
             <footer class="px-6 py-2 text-gray-100 bg-gray-800">

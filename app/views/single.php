@@ -35,7 +35,7 @@
     </head>
     <body class="bg-gray-200">
         <div class="overflow-x-hidden bg-gray-100">
-            <?php include PARTIALS_PATH . '_main-nav-not-connected.php' ?>
+            <?php include PARTIALS_PATH.'_main-nav-not-connected.php' ?>
             <div class="px-6 py-8">
                 <div class="container flex justify-between mx-auto">
                     <div class="w-full lg:w-8/12">
@@ -45,16 +45,16 @@
                         <div class="mt-6">
                             <div class="max-w-4xl px-10 py-6 mx-auto bg-white rounded-lg shadow-md">
                                 <div class="flex items-center justify-between">
-                                    <a href="?author=<?= $view->data['post']->post_author_name ?>"
+                                    <a href="?author=<?= $view->data['post']->post_author_slug ?>"
                                        class="flex items-center justify-end"><img
                                                 src="<?= $view->data['post']->post_author_avatar ?>"
                                                 alt="avatar"
                                                 class="hidden object-cover w-10 h-10 mr-4 rounded-full sm:block">
-                                        <h1 class="font-bold text-gray-700 hover:underline"><?= $view->data['post']->post_author_name ?></h1>
+                                        <h1 class="font-bold text-gray-700 hover:underline"><?= ucwords($view->data['post']->post_author_name) ?></h1>
                                     </a>
-                                    <?php foreach ($view->data['post']->categories as $category): ?>
-                                        <a href="/?category=<?= strtolower($category->post_category_id) ?>"
-                                           class="px-2 py-1 font-bold text-gray-100 bg-gray-600 rounded hover:bg-gray-500"><?= ucwords($category->post_category_name) ?></a>
+                                    <?php foreach ($view->data['post']->post_categories as $category): ?>
+                                        <a href="/?category=<?= strtolower($category->category_slug) ?>"
+                                           class="px-2 py-1 font-bold text-gray-100 bg-gray-600 rounded hover:bg-gray-500"><?= ucwords($category->category_name) ?></a>
                                     <?php endforeach; ?>
                                 </div>
                                 <div class="my-4">
@@ -68,7 +68,7 @@
                             </div>
                         </div>
                     </div>
-                    <?php include PARTIALS_PATH . '_aside.php' ?>
+                    <?php include PARTIALS_PATH.'_aside.php' ?>
                 </div>
             </div>
             <footer class="px-6 py-2 text-gray-100 bg-gray-800">

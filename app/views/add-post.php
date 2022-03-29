@@ -35,7 +35,7 @@
     </head>
     <body class="bg-gray-200">
         <div class="overflow-x-hidden bg-gray-100">
-            <?php include PARTIALS_PATH . '_main-nav-connected.php' ?>
+            <?php include PARTIALS_PATH.'_main-nav-connected.php' ?>
 
             <div class="px-6 py-8">
                 <div class="container flex justify-between mx-auto">
@@ -49,18 +49,18 @@
 
                                 <label for="post-title"
                                        class="block<?= isset($_SESSION['errors']['post-title']) ? ' text-red-600' : '' ?> mb-2">Post
-                                    Title</label>
-                                <?= isset($_SESSION['errors']['post-title']) ? '<p class="italic text-red-600">' . $_SESSION['errors']['post-title'] . '</p>' : '' ?>
+                                                                                                                                Title</label>
+                                <?= isset($_SESSION['errors']['post-title']) ? '<p class="italic text-red-600">'.$_SESSION['errors']['post-title'].'</p>' : '' ?>
                                 <input id="post-title"
                                        type="text"
                                        name="post-title"
-                                    <?= isset($_SESSION['old']['post-title']) ? 'value="' . $_SESSION['old']['post-title'] . '"' : '' ?>
+                                    <?= isset($_SESSION['old']['post-title']) ? 'value="'.$_SESSION['old']['post-title'].'"' : '' ?>
                                        class="w-full rounded-md<?= isset($_SESSION['errors']['post-title']) ? ' border-red-600  accent-red-600' : ' border-gray-300' ?> shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
 
                                 <label for="post-excerpt"
                                        class="block<?= isset($_SESSION['errors']['post-excerpt']) ? ' text-red-600' : '' ?> mt-8 mb-2">Post
-                                    Excerpt</label>
-                                <?= isset($_SESSION['errors']['post-excerpt']) ? '<p class="italic text-red-600">' . $_SESSION['errors']['post-excerpt'] . '</p>' : '' ?>
+                                                                                                                                       Excerpt</label>
+                                <?= isset($_SESSION['errors']['post-excerpt']) ? '<p class="italic text-red-600">'.$_SESSION['errors']['post-excerpt'].'</p>' : '' ?>
                                 <textarea name="post-excerpt"
                                           id="post-excerpt"
                                           rows="5"
@@ -68,8 +68,8 @@
 
                                 <label for="post-body"
                                        class="block<?= isset($_SESSION['errors']['post-body']) ? ' text-red-600' : '' ?> mt-8 mb-2">Post
-                                    Body</label>
-                                <?= isset($_SESSION['errors']['post-body']) ? '<p class="italic text-red-600">' . $_SESSION['errors']['post-body'] . '</p>' : '' ?>
+                                                                                                                                    Body</label>
+                                <?= isset($_SESSION['errors']['post-body']) ? '<p class="italic text-red-600">'.$_SESSION['errors']['post-body'].'</p>' : '' ?>
                                 <textarea name="post-body"
                                           id="post-body"
                                           rows="10"
@@ -77,13 +77,16 @@
 
                                 <label for="post-category"
                                        class="block<?= isset($_SESSION['errors']['category']) ? ' text-red-600' : '' ?> mt-8 mb-2">Post
-                                    Category</label>
-                                <?= isset($_SESSION['errors']['category']) ? '<p class="italic text-red-600">' . $_SESSION['errors']['category'] . '</p>' : '' ?>
+                                                                                                                                   Category</label>
+                                <?= isset($_SESSION['errors']['category']) ? '<p class="italic text-red-600">'.$_SESSION['errors']['category'].'</p>' : '' ?>
                                 <select name="post-category"
                                         id="post-category"
                                         class="w-full border-<?= isset($_SESSION['errors']['category']) ? 'red-600' : 'gray-300' ?> rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                    <?php foreach (array_keys($view->data['categories']) as $category): ?>
-                                        <option value="<?= strtolower($category) ?>" <?= isset($_SESSION['old']['post-category']) ? (strtolower($_SESSION['old']['post-category']) === strtolower($category) ? 'selected' : '') : '' ?>><?= ucwords($category) ?></option>
+                                    <?php foreach ($view->data['categories'] as $category): ?>
+                                        <option value="<?= $category->id ?>"
+                                            <?= isset($_SESSION['old']['post-category']) ? ($_SESSION['old']['post-category'] === $category->id ? 'selected' : '') : '' ?>>
+                                            <?= ucwords($category->name) ?>
+                                        </option>
                                     <?php endforeach ?>
                                 </select>
                                 <input type="hidden"
@@ -96,7 +99,7 @@
                             </form>
                         </div>
                     </div>
-                    <?php include PARTIALS_PATH . '_aside.php' ?>
+                    <?php include PARTIALS_PATH.'_aside.php' ?>
                 </div>
             </div>
             <footer class="px-6 py-2 text-gray-100 bg-gray-800">

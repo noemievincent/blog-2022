@@ -9,7 +9,7 @@
                                 alt="avatar"
                                 class="object-cover w-10 h-10 mx-4 rounded-full">
                         <p><a href="index.php?author=<?= $author->slug ?>"
-                              class="mx-1 font-bold text-gray-700 hover:underline"><?= $author->name ?></a>
+                              class="mx-1 font-bold text-gray-700 hover:underline"><?= ucwords($author->name) ?></a>
                             <span class="text-sm font-light text-gray-700">Created <?= $author->posts_count ?> Posts</span>
                         </p>
                     </li>
@@ -52,7 +52,7 @@
                             alt="avatar"
                             class="object-cover w-8 h-8 rounded-full">
                     <a href="?author=<?= $view->data['most_recent_post']->post_author_slug ?>"
-                       class="font-bold mx-3 text-sm text-gray-700 hover:underline"><?= $view->data['most_recent_post']->post_author_name ?></a>
+                       class="font-bold mx-3 text-sm text-gray-700 hover:underline"><?= ucwords($view->data['most_recent_post']->post_author_name) ?></a>
                 </div>
                 <span
                         class="text-sm font-light text-gray-600"><?= (new DateTime($view->data['most_recent_post']->post_published_at))->format('M j, Y') ?></span>
