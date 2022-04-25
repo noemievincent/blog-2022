@@ -28,7 +28,7 @@
         <meta name="theme-color"
               content="#0ed3cf">
 
-        <title>Blog Page by khatabwedaa. </title>
+        <title>Create A New Post - My Awesome Blog</title>
 
         <link href="https://tailwindcomponents.com/css/component.blog-page.css"
               rel="stylesheet">
@@ -36,8 +36,7 @@
     <body class="bg-gray-200">
         <div class="overflow-x-hidden bg-gray-100">
             <?php include PARTIALS_PATH.'_main-nav-connected.php' ?>
-
-            <div class="px-6 py-8">
+            <main class="px-6 py-8">
                 <div class="container flex justify-between mx-auto">
                     <div class="w-full lg:w-8/12">
                         <div class="flex items-center justify-between">
@@ -101,7 +100,7 @@
                     </div>
                     <?php include PARTIALS_PATH.'_aside.php' ?>
                 </div>
-            </div>
+            </main>
             <footer class="px-6 py-2 text-gray-100 bg-gray-800">
                 <div class="container flex flex-col items-center justify-between mx-auto md:flex-row"><a href="#"
                                                                                                          class="text-2xl font-bold">Brand</a>

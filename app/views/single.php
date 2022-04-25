@@ -28,7 +28,7 @@
         <meta name="theme-color"
               content="#0ed3cf">
 
-        <title><?= $view->data['post']->post_title ?> - Blog</title>
+        <title><?= $view->data['post']->post_title ?> - My Awesome Blog</title>
 
         <link href="https://tailwindcomponents.com/css/component.blog-page.css"
               rel="stylesheet">
@@ -36,11 +36,11 @@
     <body class="bg-gray-200">
         <div class="overflow-x-hidden bg-gray-100">
             <?php include PARTIALS_PATH.'_main-nav-not-connected.php' ?>
-            <div class="px-6 py-8">
+            <main class="px-6 py-8">
                 <div class="container flex justify-between mx-auto">
-                    <div class="w-full lg:w-8/12">
+                    <article class="w-full lg:w-8/12">
                         <div class="flex items-center justify-between">
-                            <h1 class="text-xl font-bold text-gray-700 md:text-2xl"><?= $view->data['post']->post_title ?></h1>
+                            <h2 class="text-xl font-bold text-gray-700 md:text-2xl"><?= $view->data['post']->post_title ?></h2>
                         </div>
                         <div class="mt-6">
                             <div class="max-w-4xl px-10 py-6 mx-auto bg-white rounded-lg shadow-md">
@@ -50,7 +50,7 @@
                                                 src="<?= $view->data['post']->post_author_avatar ?>"
                                                 alt="avatar"
                                                 class="hidden object-cover w-10 h-10 mr-4 rounded-full sm:block">
-                                        <h1 class="font-bold text-gray-700 hover:underline"><?= ucwords($view->data['post']->post_author_name) ?></h1>
+                                        <span class="font-bold text-gray-700 hover:underline"><?= ucwords($view->data['post']->post_author_name) ?></span>
                                     </a>
                                     <?php foreach ($view->data['post']->post_categories as $category): ?>
                                         <a href="/?category=<?= strtolower($category->category_slug) ?>"
@@ -67,10 +67,10 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </article>
                     <?php include PARTIALS_PATH.'_aside.php' ?>
                 </div>
-            </div>
+            </main>
             <footer class="px-6 py-2 text-gray-100 bg-gray-800">
                 <div class="container flex flex-col items-center justify-between mx-auto md:flex-row"><a href="#"
                                                                                                          class="text-2xl font-bold">Brand</a>

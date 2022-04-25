@@ -28,7 +28,7 @@
         <meta name="theme-color"
               content="#0ed3cf">
 
-        <title>Blog</title>
+        <title>Posts - My Awesome Blog</title>
 
         <link href="https://tailwindcomponents.com/css/component.blog-page.css"
               rel="stylesheet">
@@ -36,7 +36,7 @@
     <body class="bg-gray-200">
         <div class="overflow-x-hidden bg-gray-100">
             <?php include PARTIALS_PATH.'_main-nav-not-connected.php' ?>
-            <div class="px-6 py-8">
+            <main class="px-6 py-8">
                 <div class="container flex justify-between mx-auto">
                     <div class="w-full lg:w-8/12">
                         <div class="flex items-center justify-between">
@@ -45,7 +45,7 @@
                         </div>
 
                         <?php foreach ($view->data['posts'] as $post): ?>
-                            <div class="mt-6">
+                            <article class="mt-6">
                                 <div class="max-w-4xl px-10 py-6 mx-auto bg-white rounded-lg shadow-md">
                                     <div class="flex items-center justify-between">
                                         <span class="font-light text-gray-600">
@@ -58,13 +58,13 @@
                                             </a>
                                         <?php endforeach ?>
                                     </div>
-                                    <div class="mt-2">
+                                    <h2 class="mt-2">
                                         <a href="index.php?action=show&slug=<?= $post->post_slug ?>"
                                            class="text-2xl font-bold text-gray-700 hover:underline">
                                             <?= $post->post_title ?>
                                         </a>
                                         <p class="mt-2 text-gray-600"><?= $post->post_excerpt ?></p>
-                                    </div>
+                                    </h2>
                                     <div class="flex items-center justify-between mt-4">
                                         <a href="index.php?action=show&slug=<?= $post->post_slug ?>"
                                            class="text-blue-500 hover:underline">
@@ -80,13 +80,13 @@
                                             </a></div>
                                     </div>
                                 </div>
-                            </div>
+                            </article>
                         <?php endforeach ?>
                         <?php include PARTIALS_PATH.'_pagination.php' ?>
                     </div>
                     <?php include PARTIALS_PATH.'_aside.php' ?>
                 </div>
-            </div>
+            </main>
             <footer class="px-6 py-2 text-gray-100 bg-gray-800">
                 <div class="container flex flex-col items-center justify-between mx-auto md:flex-row">
                     <a href="/"

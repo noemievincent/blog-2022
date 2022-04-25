@@ -1,6 +1,7 @@
-<div class="hidden w-4/12 -mx-8 lg:block">
-    <div class="px-8">
-        <h1 class="mb-4 text-xl font-bold text-gray-700">Authors</h1>
+<aside class="hidden w-4/12 -mx-8 lg:block">
+    <h2 class="sr-only">Posts filters</h2>
+    <section class="px-8">
+        <h3 class="mb-4 text-xl font-bold text-gray-700">Authors</h3>
         <div class="flex flex-col max-w-sm px-6 py-4 mx-auto bg-white rounded-lg shadow-md">
             <ul class="-mx-4">
                 <?php foreach ($view->data['authors'] as $author): ?>
@@ -16,9 +17,9 @@
                 <?php endforeach ?>
             </ul>
         </div>
-    </div>
-    <div class="px-8 mt-10">
-        <h1 class="mb-4 text-xl font-bold text-gray-700">Categories</h1>
+    </section>
+    <section class="px-8 mt-10">
+        <h3 class="mb-4 text-xl font-bold text-gray-700">Categories</h3>
         <div class="flex flex-col max-w-sm px-4 py-6 mx-auto bg-white rounded-lg shadow-md">
             <ul>
 
@@ -30,9 +31,9 @@
                 <?php endforeach ?>
             </ul>
         </div>
-    </div>
-    <div class="px-8 mt-10">
-        <h1 class="mb-4 text-xl font-bold text-gray-700">Recent Post</h1>
+    </section>
+    <section class="px-8 mt-10">
+        <h3 class="mb-4 text-xl font-bold text-gray-700">Recent Post</h3>
         <div class="flex flex-col max-w-sm px-8 py-6 mx-auto bg-white rounded-lg shadow-md">
             <div class="flex items-center justify-center">
                 <?php foreach($view->data['most_recent_post']->post_categories as $category): ?>
@@ -58,5 +59,5 @@
                         class="text-sm font-light text-gray-600"><?= (new DateTime($view->data['most_recent_post']->post_published_at))->format('M j, Y') ?></span>
             </div>
         </div>
-    </div>
-</div>
+    </section>
+</aside>

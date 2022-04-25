@@ -10,17 +10,23 @@ define('AUTHORS_COUNT', rand(2, 8));
 define('CATEGORIES_COUNT', rand(2, 8));
 define('POSTS_COUNT', rand(30, 50));
 
+const DSN = 'mysql:host=127.0.0.1;port=3306';
 try {
-    $pdo = new PDO('mysql:host=database;port=3306;dbname=blog', 'mysql', 'mysql', [
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-    ]);
+    $pdo = new PDO(DSN, 'root', '',
+        [PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 } catch (PDOException $e) {
     var_dump($e);
     exit;
 }
 
+
 $slugify = new Slugify();
+
+
+$pdo->exec(<<<SQL
+    USE blog;
+    SQL
+);
 
 //////////////////////////////
 /// AUTHORS
@@ -28,7 +34,9 @@ $slugify = new Slugify();
 
 echo '// Creating authors <br>';
 $pdo->exec(<<<SQL
+    SET FOREIGN_KEY_CHECKS = 0;
     TRUNCATE authors;
+    SET FOREIGN_KEY_CHECKS = 1;
     SQL
 );
 
@@ -39,7 +47,7 @@ for ($i = 0; $i < AUTHORS_COUNT; $i++) {
     $author_avatar = $faker->imageUrl(128, 128, 'people', true, $author_name);
     $pdo->exec(<<<SQL
         INSERT INTO authors(id, name, slug, avatar, created_at, deleted_at, updated_at) 
-        VALUES('$author_id', '$author_name', '$author_slug', '$author_avatar', now(), NULL, now())
+        VALUES('$author_id', '$author_name', '$author_slug', '$author_avatar', CURRENT_TIMESTAMP, NULL, CURRENT_TIMESTAMP)
     SQL
     );
 }
@@ -62,7 +70,7 @@ for ($i = 0; $i < CATEGORIES_COUNT; $i++) {
     $category_slug = $slugify->slugify($category_name);
     $pdo->exec(<<<SQL
         INSERT INTO categories(id, name, slug, created_at, deleted_at, updated_at) 
-        VALUES('$category_id', '$category_name', '$category_slug', now(), NULL, now())
+        VALUES('$category_id', '$category_name', '$category_slug', CURRENT_TIMESTAMP, NULL, CURRENT_TIMESTAMP)
     SQL
     );
 }
@@ -129,4 +137,41 @@ for ($i = 0; $i < POSTS_COUNT; $i++) {
         );
     }
 }
+
+//////////////////////////////
+/// COMMENTS
+//////////////////////////////
+
+echo '// Creating comments <br>';
+$pdo->exec(<<<SQL
+    SET FOREIGN_KEY_CHECKS = 0;
+    TRUNCATE comments;
+    SET FOREIGN_KEY_CHECKS = 1;
+    SQL
+);
+
+$posts_ids = $pdo->query('SELECT id FROM posts')->fetchAll(PDO::FETCH_COLUMN);
+$authors_ids = $pdo->query('SELECT id FROM authors')->fetchAll(PDO::FETCH_COLUMN);
+$mod = rand(2, 3);
+for ($i = 0; $i < POSTS_COUNT; $i++) {
+    if ($i % $mod) {
+        $comments_count = rand(1, 7);
+        $post_id = $posts_ids[$i];
+        echo '<br><br><br><br><br>'.$i.': ';
+        echo $post_id.'<br>';
+        echo '-------------'.'<br>';
+        for ($j = 0; $j < $comments_count; $j++) {
+            $id = Uuid::uuid4();
+            $author_id = $authors_ids[rand(0, AUTHORS_COUNT - 1)];
+            $body = $faker->text;
+            echo $j.':'.$id.'<br>';
+            $pdo->exec(<<<SQL
+            INSERT INTO comments(id, body, author_id, post_id) 
+            VALUES('$id', '$body', '$author_id', '$post_id');
+        SQL
+            );
+        }
+    }
+}
+
 echo '<a href="../index.php">Back to website!</a>';

@@ -1,5 +1,4 @@
 <?php
-
 use JetBrains\PhpStorm\NoReturn;
 use Cocur\Slugify\Slugify;
 
@@ -10,9 +9,9 @@ require DOCUMENT_ROOT.'/vendor/autoload.php';
 const DEFAULT_SORT_ORDER = 'DESC';
 const VIEWS_PATH = DOCUMENT_ROOT.'/views/';
 const PARTIALS_PATH = DOCUMENT_ROOT.'/views/partials/';
-const DSN = 'mysql:host=database;dbname=blog;port=3306';
-const MYSQL_USER = 'mysql';
-const MYSQL_PWD = 'mysql';
+const DSN = 'mysql:host=127.0.0.1;dbname=blog;port=3306';
+const MYSQL_USER = 'root';
+const MYSQL_PWD = '';
 const PER_PAGE = 6;
 const START_PAGE = 1;
 const PDO_OPTIONS = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ];
@@ -23,7 +22,6 @@ try {
     echo($e->getMessage());
     exit;
 }
-
 
 $action = $_REQUEST['action'] ?? 'index';
 $callback = match ($action) {
@@ -463,11 +461,23 @@ function has_validation_errors(): bool
     if (mb_strlen($_POST['post-body']) < 100 || mb_strlen($_POST['post-body']) > 1000) {
         $_SESSION['errors']['post-body'] = 'Le texte doit être avoir une taille comprise entre 100 et 1000 caractères';
     }
-    $categories = get_categories();
-    if (!in_array($_POST['post-category'], array_map(fn($c) => $c->id, $categories))) {
+    if (!category_exists($_POST['post-category'])) {
         $_SESSION['errors']['category'] = 'La catégorie doit faire partie des catégories existantes';
     }
     return (bool) count($_SESSION['errors']);
+}
+
+function category_exists(string $id)
+{
+    $sql = <<< SQL
+        SELECT count(id) as count
+        FROM categories
+        WHERE id = :id
+    SQL;
+    $statement = PDO_CONNECTION->prepare($sql);
+    $statement->execute([':id' => $id]);
+
+    return $statement->fetchColumn();
 }
 
 /**/
