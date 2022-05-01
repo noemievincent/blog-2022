@@ -3,5 +3,7 @@
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/datascripts/migrate.php" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/datascripts/seed.php" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/models/Post.php" dialect="GenericSQL" />
+    <file url="PROJECT" dialect="MySQL" />
   </component>
 </project>
