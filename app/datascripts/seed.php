@@ -42,12 +42,14 @@ $pdo->exec(<<<SQL
 
 for ($i = 0; $i < AUTHORS_COUNT; $i++) {
     $author_id = Uuid::uuid4();
-    $author_name = strtolower($faker->name());
+    $author_name = $i > 0 ? strtolower($faker->name()) : 'Dominique Vilain';
     $author_slug = $slugify->slugify($author_name);
     $author_avatar = $faker->imageUrl(128, 128, 'people', true, $author_name);
+    $author_email = $i > 0 ? $faker->unique()->safeEmail : 'dominique.vilain@hepl.be';
+    $author_password = password_hash('change_this', PASSWORD_DEFAULT);
     $pdo->exec(<<<SQL
-        INSERT INTO authors(id, name, slug, avatar, created_at, deleted_at, updated_at) 
-        VALUES('$author_id', '$author_name', '$author_slug', '$author_avatar', CURRENT_TIMESTAMP, NULL, CURRENT_TIMESTAMP)
+        INSERT INTO authors(id, name, slug, avatar, email, password, created_at, deleted_at, updated_at) 
+        VALUES('$author_id', '$author_name', '$author_slug', '$author_avatar','$author_email', '$author_password', CURRENT_TIMESTAMP, NULL, CURRENT_TIMESTAMP)
     SQL
     );
 }

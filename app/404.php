@@ -35,7 +35,7 @@
     </head>
     <body class="bg-gray-200">
         <div class="overflow-x-hidden bg-gray-100">
-            <?php include './views/partials/_main-nav-not-connected.php' ?>
+            <?php include './views/partials/_main-nav.php' ?>
             <div class="px-6 py-8">
                 <div class="container flex justify-between mx-auto">
                     <div class="w-full">

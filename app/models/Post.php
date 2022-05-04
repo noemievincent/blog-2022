@@ -1,6 +1,6 @@
 <?php
 
-namespace Models;
+namespace Blog\Models;
 
 use stdClass;
 use PDOException;
@@ -9,13 +9,11 @@ use const DEFAULT_SORT_ORDER;
 
 class Post extends Model
 {
-    private Category $category_model;
-
-    public function __construct()
-    {
+    public function __construct(
+        private readonly Category $category_model = new Category(),
+        private readonly Author $author_model = new Author()
+    ) {
         parent::__construct();
-        $this->category_model = new Category();
-        $this->author_model = new Author();
     }
 
     public function save(stdClass $post): bool|string
@@ -45,8 +43,6 @@ class Post extends Model
 
             return true;
         } catch (PDOException $exception) {
-            //$st_post->debugDumpParams();
-            //$st_relation->debugDumpParams();
             return $exception->getMessage();
         }
     }

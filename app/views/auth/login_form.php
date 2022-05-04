@@ -28,73 +28,71 @@
         <meta name="theme-color"
               content="#0ed3cf">
 
-        <title>Posts - My Awesome Blog</title>
+        <title>Login - Blog</title>
 
         <link href="https://tailwindcomponents.com/css/component.blog-page.css"
               rel="stylesheet">
     </head>
     <body class="bg-gray-200">
         <div class="overflow-x-hidden bg-gray-100">
-            <?php include PARTIALS_PATH.'_main-nav-not-connected.php' ?>
+            <?php include './views/partials/_main-nav.php' ?>
+            <div class="px-6 py-8">
+                <div class="container flex justify-between mx-auto">
+                    <div class="w-full">
+                        <h1 class="text-center font-extrabold lg:uppercase">Login</h1>
+                    </div>
+                </div>
+            </div>
             <main class="px-6 py-8">
                 <div class="container flex justify-between mx-auto">
                     <div class="w-full lg:w-8/12">
                         <div class="flex items-center justify-between">
-                            <h1 class="text-xl font-bold text-gray-700 md:text-2xl">Posts</h1>
-                            <?php include PARTIALS_PATH.'_order-posts.php' ?>
+                            <h1 class="text-xl font-bold text-gray-700 md:text-2xl">Login to the blog</h1>
                         </div>
+                        <div class="mt-6">
+                            <form action="/"
+                                  method="post">
 
-                        <?php foreach ($view->data['posts'] as $post): ?>
-                            <article class="mt-6">
-                                <div class="max-w-4xl px-10 py-6 mx-auto bg-white rounded-lg shadow-md">
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-light text-gray-600">
-                                            <?= (new DateTime($post->post_published_at))->format('M j, Y - G:i') ?>
-                                        </span>
-                                        <?php foreach ($post->post_categories as $category): ?>
-                                            <a href="?category=<?= $category->category_slug ?>"
-                                               class="px-2 py-1 font-bold text-gray-100 bg-gray-600 rounded hover:bg-gray-500">
-                                                <?= ucwords($category->category_name) ?>
-                                            </a>
-                                        <?php endforeach ?>
-                                    </div>
-                                    <h2 class="mt-2">
-                                        <a href="index.php?action=show&slug=<?= $post->post_slug ?>"
-                                           class="text-2xl font-bold text-gray-700 hover:underline">
-                                            <?= $post->post_title ?>
-                                        </a>
-                                        <p class="mt-2 text-gray-600"><?= $post->post_excerpt ?></p>
-                                    </h2>
-                                    <div class="flex items-center justify-between mt-4">
-                                        <a href="index.php?action=show&slug=<?= $post->post_slug ?>"
-                                           class="text-blue-500 hover:underline">
-                                            Read more<span class="sr-only"> about <?= $post->post_title ?></span>
-                                        </a>
-                                        <div>
-                                            <a href="?author=<?= $post->post_author_slug ?>"
-                                               class="flex items-center">
-                                                <img src="<?= $post->post_author_avatar ?>"
-                                                     alt="<?= $post->post_author_name ?>"
-                                                     class="hidden object-cover w-10 h-10 mx-4 rounded-full sm:block">
-                                                <span class="font-bold text-gray-700 hover:underline"><?= ucwords($post->post_author_name) ?></span>
-                                            </a></div>
-                                    </div>
-                                </div>
-                            </article>
-                        <?php endforeach ?>
-                        <?php include PARTIALS_PATH.'_pagination.php' ?>
+                                <label for="email"
+                                       class="block<?= isset($_SESSION['errors']['auth_email']) ? ' text-red-600' : '' ?> mb-2">Email</label>
+                                <?= isset($_SESSION['errors']['email']) ? '<p class="italic text-red-600">'.$_SESSION['errors']['email'].'</p>' : '' ?>
+                                <input id="email"
+                                       type="text"
+                                       name="email"
+                                    <?= isset($_SESSION['old']['email']) ? 'value="'.$_SESSION['old']['email'].'"' : '' ?>
+                                       class="w-full rounded-md<?= isset($_SESSION['errors']['email']) ? ' border-red-600  accent-red-600' : ' border-gray-300' ?> shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+
+                                <label for="password"
+                                       class="block<?= isset($_SESSION['errors']['password']) ? ' text-red-600' : '' ?> mt-8 mb-2">Password</label>
+                                <?= isset($_SESSION['errors']['password']) ? '<p class="italic text-red-600">'.$_SESSION['errors']['password'].'</p>' : '' ?>
+                                <input name="password"
+                                       type="password"
+                                       id="password"
+                                       rows="5"
+                                       class="w-full rounded-md<?= isset($_SESSION['errors']['password']) ? ' border-red-600  accent-red-600' : ' border-gray-300' ?> border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"><?= $_SESSION['old']['post-excerpt'] ?? '' ?>
+                                <input type="hidden"
+                                       name="action"
+                                       value="login">
+                                <input type="hidden"
+                                       name="resource"
+                                       value="auth">
+                                <button type="submit"
+                                        class="float-right mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md">
+                                    Login
+                                </button>
+                                <p class="mt-4"><a href="/">I forgot my password</a></p>
+                            </form>
+                        </div>
                     </div>
                     <?php include PARTIALS_PATH.'_aside.php' ?>
                 </div>
             </main>
             <footer class="px-6 py-2 text-gray-100 bg-gray-800">
-                <div class="container flex flex-col items-center justify-between mx-auto md:flex-row">
-                    <a href="/"
-                       class="text-2xl font-bold">Brand</a>
+                <div class="container flex flex-col items-center justify-between mx-auto md:flex-row"><a href="#"
+                                                                                                         class="text-2xl font-bold">Brand</a>
                     <p class="mt-2 md:mt-0">All rights reserved 2020.</p>
-                    <div class="flex mt-4 mb-2 -mx-2 md:mt-0 md:mb-0">
-                        <a href="#"
-                           class="mx-2 text-gray-100 hover:text-gray-400">
+                    <div class="flex mt-4 mb-2 -mx-2 md:mt-0 md:mb-0"><a href="#"
+                                                                         class="mx-2 text-gray-100 hover:text-gray-400">
                             <svg viewBox="0 0 512 512"
                                  class="w-4 h-4 fill-current">
                                 <path

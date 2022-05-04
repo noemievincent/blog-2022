@@ -1,5 +1,5 @@
 <div>
-    <form action="/index.php"
+    <form action="/"
           method="get">
         <label for="order-by">Order By </label>
         <select id="order-by"
@@ -12,6 +12,8 @@
                 Newest first
             </option>
         </select>
+        <input type="hidden" name="action" value="index">
+        <input type="hidden" name="resource" value="post">
         <button type="submit"
                 class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md ml-1">Change
         </button>

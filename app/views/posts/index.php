@@ -28,55 +28,73 @@
         <meta name="theme-color"
               content="#0ed3cf">
 
-        <title><?= $view->data['post']->post_title ?> - My Awesome Blog</title>
+        <title>Posts - My Awesome Blog</title>
 
         <link href="https://tailwindcomponents.com/css/component.blog-page.css"
               rel="stylesheet">
     </head>
     <body class="bg-gray-200">
         <div class="overflow-x-hidden bg-gray-100">
-            <?php include PARTIALS_PATH.'_main-nav-not-connected.php' ?>
+            <?php include PARTIALS_PATH.'_main-nav.php' ?>
             <main class="px-6 py-8">
                 <div class="container flex justify-between mx-auto">
-                    <article class="w-full lg:w-8/12">
+                    <div class="w-full lg:w-8/12">
                         <div class="flex items-center justify-between">
-                            <h2 class="text-xl font-bold text-gray-700 md:text-2xl"><?= $view->data['post']->post_title ?></h2>
+                            <h1 class="text-xl font-bold text-gray-700 md:text-2xl">Posts</h1>
+                            <?php include PARTIALS_PATH.'_order-posts.php' ?>
                         </div>
-                        <div class="mt-6">
-                            <div class="max-w-4xl px-10 py-6 mx-auto bg-white rounded-lg shadow-md">
-                                <div class="flex items-center justify-between">
-                                    <a href="?author=<?= $view->data['post']->post_author_slug ?>"
-                                       class="flex items-center justify-end"><img
-                                                src="<?= $view->data['post']->post_author_avatar ?>"
-                                                alt="avatar"
-                                                class="hidden object-cover w-10 h-10 mr-4 rounded-full sm:block">
-                                        <span class="font-bold text-gray-700 hover:underline"><?= ucwords($view->data['post']->post_author_name) ?></span>
-                                    </a>
-                                    <?php foreach ($view->data['post']->post_categories as $category): ?>
-                                        <a href="/?category=<?= strtolower($category->category_slug) ?>"
-                                           class="px-2 py-1 font-bold text-gray-100 bg-gray-600 rounded hover:bg-gray-500"><?= ucwords($category->category_name) ?></a>
-                                    <?php endforeach; ?>
+
+                        <?php foreach ($data['posts'] as $post): ?>
+                            <article class="mt-6">
+                                <div class="max-w-4xl px-10 py-6 mx-auto bg-white rounded-lg shadow-md">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-light text-gray-600">
+                                            <?= (new DateTime($post->post_published_at))->format('M j, Y - G:i') ?>
+                                        </span>
+                                        <?php foreach ($post->post_categories as $category): ?>
+                                            <a href="/?action=index&resource=post&category=<?= $category->category_slug ?>"
+                                               class="px-2 py-1 font-bold text-gray-100 bg-gray-600 rounded hover:bg-gray-500">
+                                                <?= ucwords($category->category_name) ?>
+                                            </a>
+                                        <?php endforeach ?>
+                                    </div>
+                                    <h2 class="mt-2">
+                                        <a href="/?action=show&resource=post&&slug=<?= $post->post_slug ?>"
+                                           class="text-2xl font-bold text-gray-700 hover:underline">
+                                            <?= $post->post_title ?>
+                                        </a>
+                                        <p class="mt-2 text-gray-600"><?= $post->post_excerpt ?></p>
+                                    </h2>
+                                    <div class="flex items-center justify-between mt-4">
+                                        <a href="/?action=show&resource=post&slug=<?= $post->post_slug ?>"
+                                           class="text-blue-500 hover:underline">
+                                            Read more<span class="sr-only"> about <?= $post->post_title ?></span>
+                                        </a>
+                                        <div>
+                                            <a href="/?action=index&resource=post&author=<?= $post->post_author_slug ?>"
+                                               class="flex items-center">
+                                                <img src="<?= $post->post_author_avatar ?>"
+                                                     alt="<?= $post->post_author_name ?>"
+                                                     class="hidden object-cover w-10 h-10 mx-4 rounded-full sm:block">
+                                                <span class="font-bold text-gray-700 hover:underline"><?= ucwords($post->post_author_name) ?></span>
+                                            </a></div>
+                                    </div>
                                 </div>
-                                <div class="my-4">
-                                    <span class="font-light text-gray-600">
-                                        <?= \Carbon\Carbon::create($view->data['post']->post_published_at)->format('M d, Y - G:i') ?>
-                                    </span>
-                                </div>
-                                <div class="mt-2 text-gray-600">
-                                    <?= $view->data['post']->post_body ?>
-                                </div>
-                            </div>
-                        </div>
-                    </article>
+                            </article>
+                        <?php endforeach ?>
+                        <?php include PARTIALS_PATH.'_pagination.php' ?>
+                    </div>
                     <?php include PARTIALS_PATH.'_aside.php' ?>
                 </div>
             </main>
             <footer class="px-6 py-2 text-gray-100 bg-gray-800">
-                <div class="container flex flex-col items-center justify-between mx-auto md:flex-row"><a href="#"
-                                                                                                         class="text-2xl font-bold">Brand</a>
+                <div class="container flex flex-col items-center justify-between mx-auto md:flex-row">
+                    <a href="/"
+                       class="text-2xl font-bold">Brand</a>
                     <p class="mt-2 md:mt-0">All rights reserved 2020.</p>
-                    <div class="flex mt-4 mb-2 -mx-2 md:mt-0 md:mb-0"><a href="#"
-                                                                         class="mx-2 text-gray-100 hover:text-gray-400">
+                    <div class="flex mt-4 mb-2 -mx-2 md:mt-0 md:mb-0">
+                        <a href="#"
+                           class="mx-2 text-gray-100 hover:text-gray-400">
                             <svg viewBox="0 0 512 512"
                                  class="w-4 h-4 fill-current">
                                 <path

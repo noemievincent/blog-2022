@@ -35,7 +35,7 @@
     </head>
     <body class="bg-gray-200">
         <div class="overflow-x-hidden bg-gray-100">
-            <?php include PARTIALS_PATH.'_main-nav-connected.php' ?>
+            <?php include PARTIALS_PATH.'_main-nav.php' ?>
             <main class="px-6 py-8">
                 <div class="container flex justify-between mx-auto">
                     <div class="w-full lg:w-8/12">
@@ -81,7 +81,7 @@
                                 <select name="post-category"
                                         id="post-category"
                                         class="w-full border-<?= isset($_SESSION['errors']['category']) ? 'red-600' : 'gray-300' ?> rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                    <?php foreach ($view->data['categories'] as $category): ?>
+                                    <?php foreach ($data['categories'] as $category): ?>
                                         <option value="<?= $category->id ?>"
                                             <?= isset($_SESSION['old']['post-category']) ? ($_SESSION['old']['post-category'] === $category->id ? 'selected' : '') : '' ?>>
                                             <?= ucwords($category->name) ?>
@@ -91,6 +91,9 @@
                                 <input type="hidden"
                                        name="action"
                                        value="store">
+                                <input type="hidden"
+                                       name="resource"
+                                       value="post">
                                 <button type="submit"
                                         class="float-right mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md">
                                     Create new post
@@ -136,4 +139,3 @@
         </div>
     </body>
 </html>
-<?php unset($_SESSION['errors'], $_SESSION['old']) ?>

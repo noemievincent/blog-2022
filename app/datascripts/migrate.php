@@ -19,6 +19,8 @@ $pdo->exec(<<< SQL
         name       varchar(255) null,
         slug       varchar(255) null unique,
         avatar     tinytext null,
+        email      varchar(255) not null unique,
+        password   varchar(255) not null,
         created_at timestamp    default CURRENT_TIMESTAMP,
         deleted_at timestamp    null,
         updated_at timestamp    default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
