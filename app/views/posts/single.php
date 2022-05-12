@@ -45,30 +45,30 @@ use Carbon\Carbon;
                 <div class="container flex justify-between mx-auto">
                     <article class="w-full lg:w-8/12">
                         <div class="flex items-center justify-between">
-                            <h2 class="text-xl font-bold text-gray-700 md:text-2xl"><?= $data['post']->post_title ?></h2>
+                            <h2 class="text-xl font-bold text-gray-700 md:text-2xl"><?= $data['post']->title ?></h2>
                         </div>
                         <div class="mt-6">
                             <div class="max-w-4xl px-10 py-6 mx-auto bg-white rounded-lg shadow-md">
                                 <div class="flex items-center justify-between">
-                                    <a href="?action=index&resource=post&author=<?= $data['post']->post_author_slug ?>"
+                                    <a href="?action=index&resource=post&author=<?= $data['post']->author->slug ?>"
                                        class="flex items-center justify-end"><img
-                                                src="<?= $data['post']->post_author_avatar ?>"
+                                                src="<?= $data['post']->author->avatar ?>"
                                                 alt="avatar"
                                                 class="hidden object-cover w-10 h-10 mr-4 rounded-full sm:block">
-                                        <span class="font-bold text-gray-700 hover:underline"><?= ucwords($data['post']->post_author_name) ?></span>
+                                        <span class="font-bold text-gray-700 hover:underline"><?= $data['post']->author->name ?></span>
                                     </a>
-                                    <?php foreach ($data['post']->post_categories as $category): ?>
-                                        <a href="/?action=index&resource=post&category=<?= strtolower($category->category_slug) ?>"
-                                           class="px-2 py-1 font-bold text-gray-100 bg-gray-600 rounded hover:bg-gray-500"><?= ucwords($category->category_name) ?></a>
+                                    <?php foreach ($data['post']->categories as $category): ?>
+                                        <a href="/?action=index&resource=post&category=<?= strtolower($category->slug) ?>"
+                                           class="px-2 py-1 font-bold text-gray-100 bg-gray-600 rounded hover:bg-gray-500"><?= $category->name ?></a>
                                     <?php endforeach; ?>
                                 </div>
                                 <div class="my-4">
                                     <span class="font-light text-gray-600">
-                                        <?= Carbon::create($data['post']->post_published_at)->format('M d, Y - G:i') ?>
+                                        <?= Carbon::create($data['post']->published_at)->format('M d, Y - G:i') ?>
                                     </span>
                                 </div>
                                 <div class="mt-2 text-gray-600">
-                                    <?= $data['post']->post_body ?>
+                                    <?= $data['post']->body ?>
                                 </div>
                             </div>
                         </div>

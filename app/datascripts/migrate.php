@@ -1,65 +1,87 @@
 <?php
-const DSN = 'mysql:host=127.0.0.1;port=3306';
-try {
-    $pdo = new PDO(DSN, 'root', '',
-        [PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
-} catch (PDOException $e) {
-    var_dump($e);
-    exit;
-}
+require_once '../vendor/autoload.php';
 
-echo '// Starting creation of DB <br>';
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Capsule\Manager as Capsule;
+
+$capsule = new Capsule;
+
+$capsule->addConnection([
+    'driver' => 'mysql',
+    'host' => '127.0.0.1',
+    'database' => 'blog',
+    'username' => 'root',
+    'password' => '',
+    'charset' => 'utf8',
+    'collation' => 'utf8_unicode_ci',
+    'prefix' => '',
+]);
+$capsule->setAsGlobal();
+$capsule->bootEloquent();
+
+
+Capsule::schema()->dropIfExists('categories');
+Capsule::schema()->create('categories', function ($table) {
+    $table->string('id')->primary();
+    $table->string('name')->nullable();
+    $table->string('slug')->nullable()->unique();
+    $table->timestamps();
+    $table->softDeletes();
+});
+
+Capsule::schema()->dropIfExists('authors');
+Capsule::schema()->create('authors', function ($table) {
+    $table->string('id')->primary();
+    $table->string('name')->nullable();
+    $table->string('slug')->nullable()->unique();
+    $table->tinyText('avatar')->nullable();
+    $table->string('email')->unique();
+    $table->string('password');
+    $table->timestamps();
+    $table->softDeletes();
+});
+
+Capsule::schema()->dropIfExists('posts');
+Capsule::schema()->create('posts', function (Blueprint $table) {
+    $table->string('id')->primary();
+    $table->string('title')->nullable();
+    $table->string('slug')->nullable()->unique();
+    $table->text('body')->nullable();
+    $table->mediumText('excerpt')->nullable();
+    $table->tinytext('thumbnail')->nullable();
+    $table->string('author_id');
+    $table->timestamp('published_at');
+    $table->timestamps();
+    $table->softDeletes();
+    $table->foreign('author_id')->references('id')->on('authors');
+});
+
+Capsule::schema()->dropIfExists('category_post');
+Capsule::schema()->create('category_post', function (Blueprint $table) {
+    $table->string('category_id');
+    $table->string('post_id');
+    $table->primary(['post_id', 'category_id']);
+    $table->timestamps();
+    $table->softDeletes();
+    $table->foreign('category_id')->references('id')->on('categories');
+    $table->foreign('post_id')->references('id')->on('posts');
+});
+
+Capsule::schema()->dropIfExists('comments');
+Capsule::schema()->create('comments', function (Blueprint $table) {
+    $table->string('id');
+    $table->text('body');
+    $table->string('author_id');
+    $table->string('post_id');
+    $table->timestamps();
+    $table->softDeletes();
+    $table->foreign('author_id')->references('id')->on('authors');
+    $table->foreign('post_id')->references('id')->on('posts');
+});
+
+
+/*
 $pdo->exec(<<< SQL
-    DROP DATABASE IF EXISTS blog;
-    CREATE SCHEMA blog;
-    USE blog;
-    create table authors
-    (
-        id         varchar(255) not null primary key,
-        name       varchar(255) null,
-        slug       varchar(255) null unique,
-        avatar     tinytext null,
-        email      varchar(255) not null unique,
-        password   varchar(255) not null,
-        created_at timestamp    default CURRENT_TIMESTAMP,
-        deleted_at timestamp    null,
-        updated_at timestamp    default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    );
-    create table categories
-    (
-        id         varchar(255) not null primary key,
-        name       varchar(255) null unique,
-        slug       varchar(255) null unique,
-        created_at timestamp    default CURRENT_TIMESTAMP,
-        deleted_at timestamp    null,
-        updated_at timestamp    default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    );
-    create table posts
-    (
-        id           varchar(255) not null primary key,
-        title        varchar(255) null,
-        slug         varchar(255) null unique,
-        body         text         null,
-        published_at timestamp    null,
-        excerpt      text         null,
-        thumbnail    varchar(255) null,
-        author_id    varchar(255) null,
-        created_at timestamp    default CURRENT_TIMESTAMP,
-        deleted_at timestamp    null,
-        updated_at timestamp    default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    );
-    create table category_post
-    (
-        category_id varchar(255) not null,
-        post_id     varchar(255) not null,
-        primary key (category_id, post_id),
-        constraint category_post_categories_id_fk
-            foreign key (category_id) references categories (id)
-                on update cascade on delete cascade,
-        constraint category_post_posts_id_fk
-            foreign key (post_id) references posts (id)
-                on update cascade on delete cascade
-    );
     create table comments
     (
         id         varchar(255) not null primary key,
@@ -81,3 +103,4 @@ $pdo->exec(<<< SQL
 );
 echo '// Finished creating DB <br>';
 echo '<a href="seed.php">Seed it now!</a>';
+*/

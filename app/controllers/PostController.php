@@ -30,39 +30,31 @@ class PostController
         // Order setting from request
         $sort_order = isset($_GET['order-by']) && $_GET['order-by'] === 'oldest' ? 'ASC' : DEFAULT_SORT_ORDER;
 
-        // Filter setting from request
-        $filter = [];
-        if (isset($_GET['category'])) {
-            $filter['type'] = 'category';
-            $filter['value'] = $_GET['category'];
-            define('POSTS_COUNT', $this->post_model->count_by_category($_GET['category']));
-        } elseif (isset($_GET['author'])) {
-            $filter['type'] = 'author';
-            $filter['value'] = $_GET['author'];
-            define('POSTS_COUNT', $this->post_model->count_by_author($_GET['author']));
+        if (isset($_GET['author'])) {
+            $posts = Post::with(['author', 'categories'])
+                ->whereHas('author', function ($query) {
+                    $query->where('slug', $_GET['author']);
+                })
+                ->orderBy('published_at', $sort_order)
+                ->get();
+        } elseif (isset($_GET['category'])) {
+            $posts = Post::with(['author', 'categories'])
+                ->whereHas('categories', function ($query) {
+                    $query->where('slug', $_GET['category']);
+                })
+                ->orderBy('published_at', $sort_order)
+                ->get();
         } else {
-            define('POSTS_COUNT', $this->post_model->count());
+            $posts = Post::with(['categories', 'author'])
+                ->orderBy('published_at', $sort_order)
+                ->get();
         }
-
-        // Pagination setting from request
-        define('MAX_PAGE', intdiv(POSTS_COUNT, PER_PAGE) + (POSTS_COUNT % PER_PAGE ? 1 : 0));
-
-        $p = START_PAGE;
-        if (isset($_GET['p'])) {
-            if ((int) $_GET['p'] >= START_PAGE && (int) $_GET['p'] <= MAX_PAGE) {
-                $p = (int) $_GET['p'];
-            }
-        }
-
-        // Main data for request
-        $posts = $this->post_model->get($filter, $sort_order, $p);
 
         // Rendering
         $view_data = [];
         $view_data['view'] = 'posts/index.php';
         $aside_data = $this->fetch_aside_data();
-        $view_data['data'] = array_merge($aside_data, compact('posts', 'p'));
-
+        $view_data['data'] = array_merge($aside_data, compact('posts'));
         return $view_data;
     }
 
@@ -81,13 +73,14 @@ class PostController
             header('location: 404.php'); // Idéalement 404
             exit;
         }
-        $post = $this->post_model->find_by_slug($_GET['slug']);
+        $post = Post::with('categories')
+            ->where('slug', $_GET['slug'])
+            ->first();
 
         if (!$post) {
             header('Location: 404.php'); // Idéalement 404
             exit;
         }
-        $this->post_model->add_categories($post);
 
         $view_data = [];
         $view_data['view'] = 'posts/single.php';
@@ -100,23 +93,19 @@ class PostController
     {
         if (!$this->has_validation_errors()) {
             $slugify = new Slugify();
-            $post = new stdClass();
-            $post->id = Uuid::uuid4();
+            $post = new Post();
+            $id = Uuid::uuid4();
+            $post->id = $id;
             $post->title = $_POST['post-title'];
             $post->slug = $slugify->slugify($post->title);
             $post->body = $_POST['post-body'];
             $post->excerpt = $_POST['post-excerpt'];
-            $post->category_id = $_POST['post-category'];
             $post->thumbnail = '';
             $post->published_at = Carbon::now();
-            $authors = $this->author_model->get();
-            $count_authors = count($authors);
-            $author = $authors[rand(0, $count_authors - 1)];
-            $post->author_id = $author->id;
-            $post->author_avatar = $author->avatar;
-
-            $result = $this->post_model->save($post);
-            if ($result === true) {
+            $post->author_id = Author::inRandomOrder()->first()->id;
+            $result = $post->save();
+            if ($result) {
+                $post->categories()->attach($_POST['post-category']);
                 header('Location: index.php?action=show&slug='.$post->slug);
             } else {
                 die($result);

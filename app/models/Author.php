@@ -2,45 +2,37 @@
 
 namespace Blog\Models;
 
-use stdClass;
+use Ramsey\Uuid\UuidInterface;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+/**
+ * @property mixed|UuidInterface $id
+ * @property mixed|string $name
+ * @property mixed $slug
+ * @property mixed|string $avatar
+ * @property mixed|string $email
+ * @property mixed|string $password
+ * @method static inRandomOrder()
+ * @method static select(string $string)
+ * @method static get(string[] $array)
+ */
 
 class Author extends Model
 {
-    public function get(): array
-    {
-        $sql = <<<SQL
-                SELECT a.id,
-                       a.name, 
-                       a.avatar, 
-                       a.slug, 
-                       count(posts.id) as posts_count
-                FROM posts
-                JOIN authors a on posts.author_id = a.id
-                GROUP BY a.id
-            SQL;
+    protected $keyType = 'string';
+    protected $casts = [
+        'id' => 'string',
+    ];
+    protected $withCount = ['posts'];
 
-        return $this->pdo_connection->query($sql)->fetchAll();
+    public function posts(): HasMany
+    {
+        return $this->hasMany(Post::class);
     }
 
-    public function find_by_slug($slug): stdClass|bool
+    public function comments(): HasMany
     {
-        $sql = <<<SQL
-            SELECT * FROM authors WHERE slug = :slug;
-        SQL;
-        $statement = $this->pdo_connection->prepare($sql);
-        $statement->execute([':slug' => $slug]);
-
-        return $statement->fetch();
-    }
-
-    public function find_by_email($email): stdClass|bool
-    {
-        $sql = <<<SQL
-            SELECT * FROM authors WHERE email = :email;
-        SQL;
-        $statement = $this->pdo_connection->prepare($sql);
-        $statement->execute([':email' => $email]);
-
-        return $statement->fetch();
+        return $this->hasMany(Comment::class);
     }
 }

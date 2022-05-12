@@ -2,6 +2,8 @@
 
 namespace Blog\Request\Validators;
 
+use Blog\Models\Category;
+
 trait StorePostRequest
 {
     public function has_validation_errors(): bool
@@ -17,7 +19,7 @@ trait StorePostRequest
         if (mb_strlen($_POST['post-body']) < 100 || mb_strlen($_POST['post-body']) > 1000) {
             $_SESSION['errors']['post-body'] = 'Le texte doit être avoir une taille comprise entre 100 et 1000 caractères';
         }
-        if (!$this->category_model->category_exists($_POST['post-category'])) {
+        if (!Category::find($_POST['post-category'])) {
             $_SESSION['errors']['category'] = 'La catégorie doit faire partie des catégories existantes';
         }
 

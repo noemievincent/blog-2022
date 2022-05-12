@@ -2,13 +2,17 @@
 
 namespace Blog\ViewComposers;
 
+use Blog\Models\Post;
+use Blog\Models\Author;
+use Blog\Models\Category;
+
 trait AsideData
 {
     public function fetch_aside_data()
     {
-        $authors = $this->author_model->get();
-        $categories = $this->category_model->get();
-        $most_recent_post = $this->post_model->latest();
+        $authors = Author::all();
+        $categories = Category::all();
+        $most_recent_post = Post::latest('published_at')->first();
 
         return compact('authors', 'categories', 'most_recent_post');
     }

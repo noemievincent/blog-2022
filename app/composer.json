@@ -4,7 +4,9 @@
     "cocur/slugify": "^4.1",
     "ext-pdo": "*",
     "nesbot/carbon": "^2.57",
-    "guzzlehttp/guzzle": "^7.0"
+    "guzzlehttp/guzzle": "^7.0",
+    "illuminate/database": "^9.11",
+    "illuminate/pagination": "^9.12"
   },
   "require-dev": {
     "fakerphp/faker": "^1.19"
