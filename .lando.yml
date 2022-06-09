@@ -1,4 +1,4 @@
-name: blog
+name: blog-examen
 recipe: lemp
 config:
   webroot: app
